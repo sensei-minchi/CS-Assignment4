@@ -8,8 +8,8 @@ Target duration: 2–3 minutes.
 What to have open before recording: Two terminal windows, one browser (with ability to open incognito), and your code editor.
 
 PRE-RECORDING CHECKLIST
- Terminal 1 ready in stored-xss-demo/ folder
- Terminal 2 ready in stored-xss-demo/ folder
+ Terminal 1 ready in Chinmay_Raheja_IIT2024164-Stored_XSS/ folder
+ Terminal 2 ready in Chinmay_Raheja_IIT2024164-Stored_XSS/ folder
  Browser open (Chrome recommended)
  Code editor with server.js and views/wall.ejs open
  No leftover comments (click "Reset comments" before starting)
