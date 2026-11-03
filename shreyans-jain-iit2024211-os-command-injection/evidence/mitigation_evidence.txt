@@ -1,0 +1,19 @@
+=================================================================
+EVIDENCE OF MITIGATION: OS COMMAND INJECTION DEFENSE
+=================================================================
+Endpoint:           http://127.0.0.1:5000/api/ping/mitigated
+Timestamp:          2026-11-03 21:11:29
+HTTP Status:        400
+Payload Attempted:  127.0.0.1 & whoami
+Result Status:      blocked
+Defense Message:    Mitigation blocked input: Target does not match strict IP/hostname allow-list. Shell metacharacters are rejected.
+
+--- TECHNICAL DEFENSE EXPLANATION ---
+1. Allow-List Input Validation: The target string failed the strict
+   IP/hostname validation regex and was rejected immediately (HTTP 400).
+2. Parameterized Execution: Even if an input passes without shell metacharacters,
+   subprocess.run() executes the executable directly with shell=False,
+   preventing any command interpreter invocation.
+=================================================================
+VERDICT: Exploit BLOCKED. The identical payload was completely neutralized.
+=================================================================
