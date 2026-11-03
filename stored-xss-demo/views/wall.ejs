@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Campus Comment Wall</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+  <% if (mode === "vulnerable") { %>
+    <div class="banner vulnerable">⚠ VULNERABLE MODE — comments are rendered with NO output encoding (&lt;%- text %&gt;)</div>
+  <% } else { %>
+    <div class="banner secure">✅ SECURE MODE — comments are rendered with auto-escaping (&lt;%= text %&gt;)</div>
+  <% } %>
+
+  <header>
+    <h1>🎓 Campus Comment Wall</h1>
+    <nav>
+      <a href="/?mode=vulnerable" class="<%= mode === 'vulnerable' ? 'active' : '' %>">Vulnerable mode</a>
+      <a href="/?mode=secure" class="<%= mode === 'secure' ? 'active' : '' %>">Secure mode</a>
+      <form action="/reset" method="POST" style="display:inline">
+        <button type="submit" class="reset-btn">Reset comments</button>
+      </form>
+    </nav>
+    <p class="session-info">Your fake session cookie: <code><%= session %></code>
+      (<%= mode === "vulnerable" ? "NOT HttpOnly — readable by JS" : "HttpOnly — hidden from JS" %>)</p>
+  </header>
+
+  <main>
+    <section class="post-form">
+      <h2>Leave a comment</h2>
+      <form action="/comment" method="POST">
+        <input type="text" name="name" placeholder="Your name" required maxlength="50" />
+        <textarea name="text" placeholder="Say something..." required rows="2"></textarea>
+        <button type="submit">Post</button>
+      </form>
+      <p class="hint">Try payload: <code>&lt;img src=x onerror=alert(document.cookie)&gt;</code></p>
+    </section>
+
+    <section class="comments">
+      <h2>Comments</h2>
+      <% comments.forEach(function(c) { %>
+        <div class="comment">
+          <strong><%= c.name %></strong>
+          <div class="comment-text">
+            <%
+              // ---------------------------------------------------------
+              // THE VULNERABILITY / THE FIX LIVES RIGHT HERE
+              // ---------------------------------------------------------
+            %>
+            <% if (mode === "vulnerable") { %>
+              <%- c.text %>  <!-- VULNERABLE: raw, unescaped output -->
+            <% } else { %>
+              <%= c.text %>  <!-- SECURE: EJS auto-escapes HTML entities -->
+            <% } %>
+          </div>
+        </div>
+      <% }); %>
+    </section>
+  </main>
+
+  <footer>
+    <p>IT-30001 Cyber Security — Stored XSS demo. Root cause: user input is stored and later
+      rendered into HTML without context-aware output encoding, so the browser executes it as
+      markup/script instead of treating it as plain text.</p>
+  </footer>
+</body>
+</html>
