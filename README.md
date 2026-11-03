@@ -9,7 +9,7 @@
 | Member Name | Roll Number | Category | Variant Implemented | Subproject Directory |
 | :--- | :--- | :--- | :--- | :--- |
 | **Shreyans Jain** | **IIT2024211** | **OS Command Injection** | **Variant 1: In-Band (Command Output Returned)** | [`shreyans-jain-iit2024211-os-command-injection/`](./shreyans-jain-iit2024211-os-command-injection/) |
-| **Sensei Minchi** | **IIT2024164** | **Cross-Site Scripting (XSS)** | **Variant 1: Stored XSS** | [`stored-xss-demo/`](./stored-xss-demo/) |
+| **Chinmay Raheja** | **IIT2024164** | **Cross-Site Scripting (XSS)** | **Variant 1: Stored XSS** | [`stored-xss-demo/`](./stored-xss-demo/) |
 | **Kunal Khandelwal** | **IIT2024162** | **Cross-Site Scripting (XSS)** | **Variant 2: Reflected XSS** | [`reflected-xss-demo/`](./Reflected_XSS) |
 | **Vedant Bahekar** | **IIT2024166** | **SQL Injection** | **Variant 1: Authentication Bypass** | [`Vedant_Bahekar_IIT2024166-SQL_injection/`](./Vedant_Bahekar_IIT2024166-SQL_injection/) |
 | *[Member 4]* | *[Roll Number]* | *Cross-Site Request Forgery (CSRF)* | *[Variant Chosen]* | *TBD* |
