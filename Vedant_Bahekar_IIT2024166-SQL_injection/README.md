@@ -121,12 +121,13 @@ defence-in-depth layered on top.
 
 ## Table 3 — Ownership declaration
 
-| Member name | Roll number | Category      | Variant implemented   |
-|-------------|-------------|---------------|-----------------------|
-| _TODO_      | _TODO_      | SQL injection | Authentication bypass |
+| Member name    | Roll number | Category      | Variant implemented   |
+|----------------|-------------|---------------|-----------------------|
+| Vedant Bahekar | IIT2024166  | SQL injection | Authentication bypass |
 
-> Fill in your name and roll number. If this repo covers the whole group's four
-> variants, add the other members' rows here too.
+> This folder covers the SQL injection authentication-bypass variant. The other
+> categories (OS command injection, XSS, CSRF) are in their own member folders in
+> this repository.
 
 ---
 
