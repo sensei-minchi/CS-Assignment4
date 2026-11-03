@@ -12,7 +12,7 @@
 | **Chinmay Raheja** | **IIT2024164** | **Cross-Site Scripting (XSS)** | **Variant 1: Stored XSS** | [`stored-xss-demo/`](./stored-xss-demo/) |
 | **Kunal Khandelwal** | **IIT2024162** | **Cross-Site Scripting (XSS)** | **Variant 2: Reflected XSS** | [`reflected-xss-demo/`](./Reflected_XSS) |
 | **Vedant Bahekar** | **IIT2024166** | **SQL Injection** | **Variant 1: Authentication Bypass** | [`Vedant_Bahekar_IIT2024166-SQL_injection/`](./Vedant_Bahekar_IIT2024166-SQL_injection/) |
-| *[Member 4]* | *[Roll Number]* | *Cross-Site Request Forgery (CSRF)* | *[Variant Chosen]* | *TBD* |
+| **KUNAL V KURUNDWADKAR** | **IIT2024177** | *Cross-Site Request Forgery (CSRF)* | *[Variant Chosen]* | *TBD* |
 
 ---
 
