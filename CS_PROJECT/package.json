@@ -1,0 +1,19 @@
+{
+  "name": "reflected-xss-lab",
+  "version": "1.0.0",
+  "description": "Reflected XSS Testbed & Attacker C2 Operations Console (Node.js + Express)",
+  "private": true,
+  "scripts": {
+    "start": "node src/server_runner.js",
+    "start:vulnerable": "node src/app_vulnerable.js",
+    "start:secure": "node src/app_secure.js",
+    "start:attacker": "node src/app_attacker.js",
+    "stop": "./stop_all.sh"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

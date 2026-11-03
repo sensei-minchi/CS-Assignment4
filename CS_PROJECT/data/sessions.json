@@ -1,0 +1,209 @@
+{
+  "dfe7be370847e5c38613382b8aeaa8eb": {
+    "username": "victim",
+    "role": "customer",
+    "accountNumber": "ACC-8842-9104",
+    "balance": "$12,450.00",
+    "email": "victim@securebank.local",
+    "createdAt": "2026-11-03T03:31:10.790Z",
+    "lastActivity": "2026-11-03T03:31:10.790Z"
+  },
+  "4a8d87b0d6a988c2a3871da3bed32f5d": {
+    "username": "victim",
+    "role": "customer",
+    "accountNumber": "ACC-8842-9104",
+    "balance": "$12,450.00",
+    "email": "victim@securebank.local",
+    "createdAt": "2026-11-03T03:32:26.676Z",
+    "lastActivity": "2026-11-03T03:32:49.029Z"
+  },
+  "c7cfe59bc711c5130ee097ac7d77993c": {
+    "username": "victim",
+    "role": "customer",
+    "accountNumber": "ACC-8842-9104",
+    "balance": "$12,450.00",
+    "email": "victim@securebank.local",
+    "createdAt": "2026-11-03T03:32:49.029Z",
+    "lastActivity": "2026-11-03T03:34:50.266Z"
+  },
+  "70ba59cc6479f5f4f94ad594e7070d58": {
+    "username": "victim",
+    "role": "customer",
+    "accountNumber": "ACC-8842-9104",
+    "balance": "$12,450.00",
+    "email": "attacker-takeover@shadow-c2.com",
+    "createdAt": "2026-11-03T03:34:50.266Z",
+    "lastActivity": "2026-11-03T03:45:52.475Z"
+  },
+  "7b0dfa73f3a393b50e2b5f3786541f57": {
+    "username": "victim",
+    "role": "customer",
+    "accountNumber": "ACC-8842-9104",
+    "balance": "$12,450.00",
+    "email": "victim@securebank.local",
+    "createdAt": "2026-11-03T03:45:52.476Z",
+    "lastActivity": "2026-11-03T12:50:49.477Z"
+  },
+  "d78efd9fed8a4cac744f392b594062f3": {
+    "username": "victim",
+    "role": "customer",
+    "accountNumber": "ACC-8842-9104",
+    "balance": "$12,450.00",
+    "email": "victim@securebank.local",
+    "createdAt": "2026-11-03T03:46:46.778Z",
+    "lastActivity": "2026-11-03T03:46:46.778Z"
+  },
+  "a405c46f2c797ea5b15bc97dd2c49eb8": {
+    "username": "victim",
+    "role": "customer",
+    "accountNumber": "ACC-8842-9104",
+    "balance": "$12,450.00",
+    "email": "victim@securebank.local",
+    "createdAt": "2026-11-03T03:51:49.354Z",
+    "lastActivity": "2026-11-03T03:51:49.354Z"
+  },
+  "d10b235c3ce2243e3c1fc5c895542d63": {
+    "username": "victim",
+    "role": "customer",
+    "accountNumber": "ACC-8842-9104",
+    "balance": "$12,450.00",
+    "email": "victim@securebank.local",
+    "createdAt": "2026-11-03T03:52:14.914Z",
+    "lastActivity": "2026-11-03T03:52:14.914Z"
+  },
+  "da4dddd44f67da6441cc086736730654": {
+    "username": "victim",
+    "role": "customer",
+    "accountNumber": "ACC-8842-9104",
+    "balance": "$12,450.00",
+    "email": "victim@securebank.local",
+    "createdAt": "2026-11-03T03:53:06.571Z",
+    "lastActivity": "2026-11-03T03:53:06.571Z"
+  },
+  "119aa7befe4af37823416a21886a16e9": {
+    "username": "victim",
+    "role": "customer",
+    "accountNumber": "ACC-8842-9104",
+    "balance": "$12,450.00",
+    "email": "attacker-takeover@shadow-c2.com",
+    "createdAt": "2026-11-03T12:44:11.325Z",
+    "lastActivity": "2026-11-03T12:57:58.825Z"
+  },
+  "14150c019d39312d05a3a806efdf3ed2": {
+    "username": "victim",
+    "role": "customer",
+    "accountNumber": "ACC-8842-9104",
+    "balance": "$12,450.00",
+    "email": "victim@securebank.local",
+    "createdAt": "2026-11-03T12:44:26.509Z",
+    "lastActivity": "2026-11-03T12:51:57.545Z"
+  },
+  "cf54902971f86fd0be9f4f88cd6307bd": {
+    "username": "victim",
+    "role": "customer",
+    "accountNumber": "ACC-8842-9104",
+    "balance": "$12,450.00",
+    "email": "victim@securebank.local",
+    "createdAt": "2026-11-03T12:51:57.546Z",
+    "lastActivity": "2026-11-03T12:58:05.413Z"
+  },
+  "c5f4bf82ebc83273fd0c541605c4d5bf": {
+    "username": "victim",
+    "role": "customer",
+    "accountNumber": "ACC-8842-9104",
+    "balance": "$12,450.00",
+    "email": "victim@securebank.local",
+    "createdAt": "2026-11-03T12:54:05.941Z",
+    "lastActivity": "2026-11-03T12:54:07.117Z"
+  },
+  "d43bebebe072a8862fbf7b7e223ddc8f": {
+    "username": "victim",
+    "role": "customer",
+    "accountNumber": "ACC-8842-9104",
+    "balance": "$12,450.00",
+    "email": "victim@securebank.local",
+    "createdAt": "2026-11-03T12:55:47.040Z",
+    "lastActivity": "2026-11-03T12:55:48.237Z"
+  },
+  "73e04c754f55973b935d05ed65136238": {
+    "username": "victim",
+    "role": "customer",
+    "accountNumber": "ACC-8842-9104",
+    "balance": "$12,450.00",
+    "email": "victim@securebank.local",
+    "createdAt": "2026-11-03T12:55:48.237Z",
+    "lastActivity": "2026-11-03T12:57:49.217Z"
+  },
+  "bb0e0538a8ae1463bc171bddbc30dbf1": {
+    "username": "victim",
+    "role": "customer",
+    "accountNumber": "ACC-8842-9104",
+    "balance": "$12,450.00",
+    "email": "victim@securebank.local",
+    "createdAt": "2026-11-03T13:00:31.023Z",
+    "lastActivity": "2026-11-03T13:07:07.338Z"
+  },
+  "cb8fb92067c0d66ca93c9cd5162e5eb8": {
+    "username": "alice",
+    "role": "customer",
+    "accountNumber": "ACC-8842-9104",
+    "balance": "$12,450.00",
+    "email": "alice@securebank.local",
+    "createdAt": "2026-11-03T13:07:55.113Z",
+    "lastActivity": "2026-11-03T13:07:55.188Z"
+  },
+  "e46f738519360c0ca598b678a695bff9": {
+    "username": "alice",
+    "role": "customer",
+    "accountNumber": "ACC-8842-9104",
+    "balance": "$12,450.00",
+    "email": "alice@securebank.local",
+    "createdAt": "2026-11-03T13:08:07.098Z",
+    "lastActivity": "2026-11-03T13:08:07.098Z"
+  },
+  "c1ae63cbdd511e33a50e0e83849db096": {
+    "username": "alice",
+    "role": "customer",
+    "accountNumber": "ACC-8842-9104",
+    "balance": "$12,450.00",
+    "email": "alice@securebank.local",
+    "createdAt": "2026-11-03T08:16:35.224Z",
+    "lastActivity": "2026-11-03T08:18:05.468Z"
+  },
+  "1e0ba9cac54aecc6bb65fb40da5a3e37": {
+    "username": "alice",
+    "role": "customer",
+    "accountNumber": "ACC-8842-9104",
+    "balance": "$12,450.00",
+    "email": "alice@securebank.local",
+    "createdAt": "2026-11-03T08:16:35.763Z",
+    "lastActivity": "2026-11-03T08:18:54.930Z"
+  },
+  "1a21659aac2cf05f6f57028cf78f1eda": {
+    "username": "alice",
+    "role": "customer",
+    "accountNumber": "ACC-8842-9104",
+    "balance": "$12,450.00",
+    "email": "alice@securebank.local",
+    "createdAt": "2026-11-03T08:16:48.360Z",
+    "lastActivity": "2026-11-03T08:19:32.265Z"
+  },
+  "424e2ce76dbbd3e2f881af84df0118cf": {
+    "username": "alice",
+    "role": "customer",
+    "accountNumber": "ACC-8842-9104",
+    "balance": "$12,450.00",
+    "email": "alice@securebank.local",
+    "createdAt": "2026-11-03T08:16:58.031Z",
+    "lastActivity": "2026-11-03T08:18:46.612Z"
+  },
+  "b6adfb32cce024b39f893baced353b5e": {
+    "username": "alice",
+    "role": "customer",
+    "accountNumber": "ACC-8842-9104",
+    "balance": "$12,450.00",
+    "email": "attacker-takeover@shadow-c2.com",
+    "createdAt": "2026-11-03T08:20:04.257Z",
+    "lastActivity": "2026-11-03T15:46:40.114Z"
+  }
+}
