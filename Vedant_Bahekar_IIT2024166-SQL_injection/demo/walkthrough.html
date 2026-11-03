@@ -1,0 +1,336 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>SQLi Bypass Walkthrough</title>
+<style>
+  /* ---- Design tokens -------------------------------------------------
+     Layout: a fixed 16:9 "stage" scaled with container units so the frame
+     records identically at any resolution; step-driven scenes fade/slide in.
+     Committed dark "IDE/terminal" identity — single theme by design.      */
+  :root{
+    color-scheme: dark;
+    --bg:#0b0f17;            /* deep slate */
+    --panel:#121826;        /* raised surface */
+    --panel-2:#0e1420;      /* inset surface */
+    --line:#263247;         /* hairline */
+    --fg:#e8edf6;           /* primary text */
+    --muted:#8794a9;        /* secondary text */
+    --faint:#56617a;        /* dimmed / commented-out */
+    --danger:#ff5d6c;       /* vulnerable / attack */
+    --danger-dim:#5a2731;
+    --safe:#37d39b;         /* secure / mitigation */
+    --safe-dim:#174237;
+    --accent:#6aa5ff;       /* neutral accent / SQL keywords */
+    --amber:#ffc24b;        /* strings / highlights */
+    --font-sans:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+    --font-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{background:var(--bg);color:var(--fg);font-family:var(--font-sans);
+       display:flex;flex-direction:column;align-items:center;gap:1rem;
+       padding-block:clamp(10px,3vw,28px);
+       padding-left:max(16px,env(safe-area-inset-left,0px));
+       padding-right:max(16px,env(safe-area-inset-right,0px));}
+
+  /* ---- Stage: the recordable 16:9 frame ---- */
+  .stage{position:relative;width:100%;max-width:1000px;aspect-ratio:16/9;
+         background:radial-gradient(130% 130% at 85% -10%,#141c2b 0%,var(--bg) 55%);
+         border:1px solid var(--line);border-radius:14px;overflow:hidden;
+         container-type:inline-size;font-size:1.78cqw;box-shadow:0 24px 60px -30px #000;}
+  /* faint engineering grid */
+  .stage::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
+    background:linear-gradient(var(--line) 1px,transparent 1px) 0 0/100% 3.2cqw,
+              linear-gradient(90deg,var(--line) 1px,transparent 1px) 0 0/3.2cqw 100%;
+    -webkit-mask:radial-gradient(120% 120% at 50% 40%,#000 25%,transparent 72%);
+            mask:radial-gradient(120% 120% at 50% 40%,#000 25%,transparent 72%);opacity:.12}
+
+  .scene{position:absolute;inset:0;padding:5.4cqw 6cqw;display:flex;flex-direction:column;
+         justify-content:center;gap:1.4cqw;opacity:0;transform:translateY(1.6cqw) scale(.995);
+         transition:opacity .5s ease,transform .5s ease;pointer-events:none;}
+  .scene.active{opacity:1;transform:none;pointer-events:auto;}
+  @media (prefers-reduced-motion:reduce){.scene{transition:none}}
+
+  /* animate children of the active scene in sequence */
+  .scene.active .stg{animation:rise .55s both}
+  .scene.active .stg:nth-child(2){animation-delay:.10s}
+  .scene.active .stg:nth-child(3){animation-delay:.20s}
+  .scene.active .stg:nth-child(4){animation-delay:.30s}
+  .scene.active .stg:nth-child(5){animation-delay:.42s}
+  .scene.active .stg:nth-child(6){animation-delay:.54s}
+  @keyframes rise{from{opacity:0;transform:translateY(1.4cqw)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.scene.active .stg{animation:none}}
+
+  .eyebrow{font-size:1.5cqw;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);
+           font-weight:600;display:flex;align-items:center;gap:1cqw}
+  .eyebrow .pip{width:1.1cqw;height:1.1cqw;border-radius:50%;background:var(--accent)}
+  .eyebrow.red .pip{background:var(--danger)}
+  .eyebrow.green .pip{background:var(--safe)}
+  h1{font-size:8cqw;line-height:.98;margin:0;font-weight:700;letter-spacing:-.02em;text-wrap:balance}
+  h2{font-size:4.4cqw;line-height:1.02;margin:0;font-weight:700;letter-spacing:-.015em;text-wrap:balance}
+  p.lead{font-size:2.3cqw;line-height:1.4;color:var(--muted);margin:0;max-width:52ch}
+  .big{font-size:2.5cqw}
+
+  /* code blocks */
+  pre{font-family:var(--font-mono);background:var(--panel);border:1px solid var(--line);
+      border-radius:10px;padding:2.4cqw 2.8cqw;margin:0;font-size:1.9cqw;line-height:1.7;
+      overflow:auto;white-space:pre;position:relative}
+  pre .filebar{position:absolute;top:0;left:0;right:0;height:3cqw;background:var(--panel-2);
+      border-bottom:1px solid var(--line);border-radius:10px 10px 0 0;display:flex;
+      align-items:center;gap:.8cqw;padding:0 1.6cqw;font-size:1.3cqw;color:var(--muted)}
+  pre.withbar{padding-top:4.6cqw}
+  .dot{width:1cqw;height:1cqw;border-radius:50%;background:#394459}
+  .k{color:var(--accent)}      /* keyword */
+  .s{color:var(--amber)}       /* string  */
+  .c{color:var(--faint)}       /* comment */
+  .fn{color:var(--safe)}       /* function/name */
+  .var{color:var(--fg)}
+  .hl-bad{background:rgba(255,93,108,.14);box-shadow:inset 0 0 0 1px var(--danger-dim);border-radius:4px}
+  .hl-good{background:rgba(55,211,155,.13);box-shadow:inset 0 0 0 1px var(--safe-dim);border-radius:4px}
+  .del{color:var(--danger);opacity:.9}
+  .add{color:var(--safe)}
+  .line{display:block}
+
+  /* mock login card */
+  .login{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+         padding:2.6cqw;width:40cqw;display:flex;flex-direction:column;gap:1.5cqw}
+  .login .title{font-weight:700;font-size:2.2cqw}
+  .field{display:flex;flex-direction:column;gap:.6cqw}
+  .field label{font-size:1.4cqw;color:var(--muted);letter-spacing:.04em}
+  .field .input{font-family:var(--font-mono);font-size:1.8cqw;background:var(--panel-2);
+         border:1px solid var(--line);border-radius:7px;padding:1.2cqw 1.4cqw;min-height:4.4cqw;
+         display:flex;align-items:center;color:var(--fg)}
+  .field .input.attack{border-color:var(--danger);color:var(--danger)}
+  .btn{margin-top:.6cqw;align-self:flex-start;background:var(--accent);color:#07122a;
+       font-weight:700;font-size:1.8cqw;border:none;border-radius:7px;padding:1.2cqw 2.6cqw}
+
+  .row{display:flex;gap:3cqw;align-items:center;flex-wrap:wrap}
+  .grow{flex:1;min-width:0}
+
+  /* result banners */
+  .banner{display:flex;align-items:center;gap:1.6cqw;border-radius:11px;padding:2.4cqw 2.8cqw;
+          font-size:2.5cqw;font-weight:700;border:1px solid}
+  .banner .ico{font-size:3.4cqw;line-height:1}
+  .banner.bad{background:rgba(255,93,108,.12);border-color:var(--danger);color:var(--danger)}
+  .banner.good{background:rgba(55,211,155,.1);border-color:var(--safe);color:var(--safe)}
+  .banner small{display:block;font-weight:500;font-size:1.6cqw;color:var(--muted);margin-top:.5cqw}
+
+  .callout{border-left:.5cqw solid var(--danger);background:var(--panel);padding:1.8cqw 2.2cqw;
+           border-radius:0 9px 9px 0;font-size:2.1cqw;line-height:1.45}
+  .callout.good{border-color:var(--safe)}
+  .callout b{color:var(--fg)}
+
+  /* param chips (secure scene) */
+  .param{display:inline-flex;align-items:center;gap:.8cqw;background:var(--panel);
+         border:1px dashed var(--safe);border-radius:999px;padding:.8cqw 1.6cqw;
+         font-family:var(--font-mono);font-size:1.7cqw;color:var(--safe)}
+  .param .tag{font-family:var(--font-sans);font-size:1.2cqw;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+
+  .tablecard{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;font-family:var(--font-mono);font-size:1.7cqw}
+  .tablecard .hd{display:flex;background:var(--panel-2);color:var(--muted);border-bottom:1px solid var(--line)}
+  .tablecard .r{display:flex}
+  .tablecard .cell{padding:1.2cqw 1.8cqw;flex:1}
+  .tablecard .r+.r{border-top:1px solid var(--line)}
+  .zero{color:var(--muted);padding:1.6cqw 1.8cqw;font-style:italic}
+
+  ul.mit{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1.2cqw;font-size:2cqw}
+  ul.mit li{display:flex;gap:1.4cqw;align-items:flex-start;line-height:1.35}
+  ul.mit .mk{font-weight:700;flex:none;width:2.4cqw;text-align:center}
+  ul.mit .done{color:var(--safe)}
+  ul.mit .theory{color:var(--muted)}
+  ul.mit small{color:var(--muted);display:block;font-size:1.5cqw}
+
+  .scene-no{position:absolute;top:3cqw;right:3.4cqw;font-family:var(--font-mono);font-size:1.5cqw;color:var(--faint);letter-spacing:.1em}
+
+  /* ---- Controls (below the frame; not part of the recording) ---- */
+  .controls{width:100%;max-width:1000px;display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;
+            font-family:var(--font-sans)}
+  .controls button{background:var(--panel);color:var(--fg);border:1px solid var(--line);
+       border-radius:8px;padding:.55rem .95rem;font-size:.9rem;font-weight:600;cursor:pointer}
+  .controls button:hover{border-color:var(--accent)}
+  .controls button:disabled{opacity:.4;cursor:default}
+  .controls .count{font-family:var(--font-mono);color:var(--muted);font-size:.85rem;min-width:4.5rem;text-align:center}
+  .dots{display:flex;gap:.4rem;flex:1;flex-wrap:wrap;justify-content:center}
+  .dots .d{width:.65rem;height:.65rem;border-radius:50%;background:var(--line);border:none;padding:0;cursor:pointer}
+  .dots .d.on{background:var(--accent)}
+  .hint{width:100%;max-width:1000px;color:var(--muted);font-size:.82rem;text-align:center}
+  .hint kbd{font-family:var(--font-mono);background:var(--panel);border:1px solid var(--line);
+       border-bottom-width:2px;border-radius:5px;padding:.05rem .4rem;font-size:.78rem}
+</style>
+
+<main class="stage" id="stage" tabindex="0" aria-label="SQL injection authentication bypass walkthrough">
+
+  <!-- 1 — Title -->
+  <section class="scene active">
+    <div class="scene-no">01 / 10</div>
+    <div class="stg eyebrow red"><span class="pip"></span>Web Server Security · Variant 1</div>
+    <h1 class="stg">SQL Injection</h1>
+    <h2 class="stg" style="color:var(--danger)">Authentication Bypass</h2>
+    <p class="lead stg">How a single quote and two dashes walk past a login screen — and the one-line change that stops it.</p>
+    <div class="stg" style="font-family:var(--font-mono);font-size:1.5cqw;color:var(--faint)">Cyber Security (IT-30001) · exploit → root cause → mitigation</div>
+  </section>
+
+  <!-- 2 — The target -->
+  <section class="scene">
+    <div class="scene-no">02 / 10</div>
+    <div class="stg eyebrow"><span class="pip"></span>The target</div>
+    <h2 class="stg">A normal login form</h2>
+    <div class="row">
+      <div class="login stg">
+        <div class="title">Company Portal</div>
+        <div class="field"><label>Username</label><div class="input">alice</div></div>
+        <div class="field"><label>Password</label><div class="input">••••••••</div></div>
+        <div class="btn">Log in</div>
+      </div>
+      <p class="lead stg grow">Behind this form, the server builds one SQL query to check the username and password against the <span style="font-family:var(--font-mono);color:var(--amber)">users</span> table. If a matching row comes back, you're in.</p>
+    </div>
+  </section>
+
+  <!-- 3 — Vulnerable code -->
+  <section class="scene">
+    <div class="scene-no">03 / 10</div>
+    <div class="stg eyebrow red"><span class="pip"></span>The flaw · app.py</div>
+    <h2 class="stg">User input is glued into the query text</h2>
+    <pre class="withbar stg"><span class="filebar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp;app.py — login() · VULNERABLE</span><span class="line">query = (</span><span class="line">    <span class="s">"SELECT * FROM users WHERE username = '"</span></span><span class="line hl-bad">    + username</span><span class="line">    + <span class="s">"' AND password = '"</span></span><span class="line hl-bad">    + password</span><span class="line">    + <span class="s">"'"</span></span><span class="line">)</span><span class="line">row = db.<span class="fn">execute</span>(query).<span class="fn">fetchone</span>()</span></pre>
+    <p class="lead stg"><span style="color:var(--danger);font-weight:600">The red lines</span> drop whatever the user typed straight into the SQL string — as code, not as data.</p>
+  </section>
+
+  <!-- 4 — The attacker's input -->
+  <section class="scene">
+    <div class="scene-no">04 / 10</div>
+    <div class="stg eyebrow red"><span class="pip"></span>The exploit</div>
+    <h2 class="stg">The attacker types a payload, not a name</h2>
+    <div class="row">
+      <div class="login stg">
+        <div class="title">Company Portal</div>
+        <div class="field"><label>Username</label><div class="input attack">admin'&nbsp;--</div></div>
+        <div class="field"><label>Password</label><div class="input">anything</div></div>
+        <div class="btn">Log in</div>
+      </div>
+      <p class="lead stg grow">The username is <span style="font-family:var(--font-mono);color:var(--danger)">admin' --</span>. That single quote <b style="color:var(--fg)">closes the string early</b>, and <span style="font-family:var(--font-mono);color:var(--danger)">--</span> starts a SQL comment. The password can be anything.</p>
+    </div>
+  </section>
+
+  <!-- 5 — Query assembly (the key moment) -->
+  <section class="scene">
+    <div class="scene-no">05 / 10</div>
+    <div class="stg eyebrow red"><span class="pip"></span>What the database receives</div>
+    <h2 class="stg">The payload rewrites the query</h2>
+    <pre class="stg" style="font-size:2cqw"><span class="k">SELECT</span> * <span class="k">FROM</span> users <span class="k">WHERE</span> username = <span class="s">'admin'</span> <span class="c">--<span style="color:var(--danger)">&nbsp;← comment starts here</span></span>
+<span class="c" style="text-decoration:line-through;opacity:.5">' AND password = 'anything'</span></pre>
+    <div class="callout stg">Everything after <span style="font-family:var(--font-mono);color:var(--danger)">--</span> is ignored. The query the database actually runs is just:
+      <div style="font-family:var(--font-mono);color:var(--amber);margin-top:1cqw;font-size:1.9cqw"><span class="k" style="color:var(--accent)">SELECT</span> * <span class="k" style="color:var(--accent)">FROM</span> users <span class="k" style="color:var(--accent)">WHERE</span> username = 'admin'</div>
+      <div style="margin-top:.8cqw;font-size:1.8cqw"><b>The password check is gone.</b></div>
+    </div>
+  </section>
+
+  <!-- 6 — Result: bypassed -->
+  <section class="scene">
+    <div class="scene-no">06 / 10</div>
+    <div class="stg eyebrow red"><span class="pip"></span>Result</div>
+    <h2 class="stg">One row comes back — the admin</h2>
+    <div class="tablecard stg" style="max-width:60cqw">
+      <div class="hd"><div class="cell">username</div><div class="cell">role</div></div>
+      <div class="r"><div class="cell" style="color:var(--amber)">admin</div><div class="cell" style="color:var(--amber)">administrator</div></div>
+    </div>
+    <div class="banner bad stg"><span class="ico">⚠</span><div>ACCESS GRANTED — logged in as <u>admin</u><small>No valid password was ever supplied. Authentication has been bypassed.</small></div></div>
+  </section>
+
+  <!-- 7 — Root cause -->
+  <section class="scene">
+    <div class="scene-no">07 / 10</div>
+    <div class="stg eyebrow red"><span class="pip"></span>Root cause</div>
+    <h2 class="stg">Why it works</h2>
+    <p class="lead stg big" style="color:var(--fg);max-width:46ch">The input was allowed to change the <b style="color:var(--danger)">structure</b> of the query, not just its values.</p>
+    <p class="lead stg">Because the username is concatenated into the SQL text, a quote and a comment turn a two-condition check into a one-condition lookup. The database cannot tell the attacker's SQL apart from the developer's.</p>
+  </section>
+
+  <!-- 8 — The fix -->
+  <section class="scene">
+    <div class="scene-no">08 / 10</div>
+    <div class="stg eyebrow green"><span class="pip"></span>The mitigation</div>
+    <h2 class="stg">Parameterised query</h2>
+    <pre class="withbar stg"><span class="filebar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp;app.py — login() · the fix (diff)</span><span class="line del">- query = <span class="s" style="color:inherit">"... username = '" + username + "' AND password = '" + password + "'"</span></span><span class="line del">- row = db.execute(query).fetchone()</span>
+<span class="line add">+ query = <span class="s" style="color:inherit">"SELECT * FROM users WHERE username = ? AND password = ?"</span></span><span class="line add hl-good">+ row = db.execute(query, (username, password)).fetchone()</span></pre>
+    <p class="lead stg">The <span style="font-family:var(--font-mono);color:var(--safe)">?</span> placeholders keep the query fixed. The inputs are sent to the database <b style="color:var(--fg)">separately, as data</b> — they can never become SQL.</p>
+  </section>
+
+  <!-- 9 — Secure re-run -->
+  <section class="scene">
+    <div class="scene-no">09 / 10</div>
+    <div class="stg eyebrow green"><span class="pip"></span>Same payload, now blocked</div>
+    <h2 class="stg">The exploit is treated as a literal name</h2>
+    <div class="row stg">
+      <div class="param"><span class="tag">param 1</span>admin' --</div>
+      <div class="param"><span class="tag">param 2</span>anything</div>
+    </div>
+    <p class="lead stg">The database searches for a user <b style="color:var(--fg)">literally named</b> <span style="font-family:var(--font-mono);color:var(--safe)">admin' --</span>. No such row exists.</p>
+    <div class="tablecard stg" style="max-width:60cqw"><div class="hd"><div class="cell">username</div><div class="cell">role</div></div><div class="zero">0 rows returned</div></div>
+    <div class="banner good stg"><span class="ico">✓</span><div>ACCESS DENIED — Invalid username or password<small>Identical payload, Scene 5. The structure of the query can no longer be changed.</small></div></div>
+  </section>
+
+  <!-- 10 — Recap / defence in depth -->
+  <section class="scene">
+    <div class="scene-no">10 / 10</div>
+    <div class="stg eyebrow green"><span class="pip"></span>Defence in depth</div>
+    <h2 class="stg">One fix implemented, three more in theory</h2>
+    <ul class="mit">
+      <li class="stg"><span class="mk done">✓</span><div><b>Parameterised queries</b> — implemented. Input can never alter query structure. <small>The primary, most reliable fix.</small></div></li>
+      <li class="stg"><span class="mk theory">○</span><div><b>Allow-list input validation</b> <small>Reject usernames containing <span style="font-family:var(--font-mono)">' -- ;</span> before they reach the query.</small></div></li>
+      <li class="stg"><span class="mk theory">○</span><div><b>Least-privilege DB account</b> <small>The app's account can only read <span style="font-family:var(--font-mono)">users</span> — limits the blast radius.</small></div></li>
+      <li class="stg"><span class="mk theory">○</span><div><b>Safe error messages</b> <small>Never leak SQL or table names that help an attacker craft payloads.</small></div></li>
+    </ul>
+  </section>
+
+</main>
+
+<div class="controls" role="group" aria-label="Playback controls">
+  <button id="prev">‹ Prev</button>
+  <span class="count" id="count">01 / 10</span>
+  <button id="next">Next ›</button>
+  <div class="dots" id="dots"></div>
+  <button id="auto">▶ Auto</button>
+  <button id="restart">↺ Restart</button>
+</div>
+<p class="hint">Advance with <kbd>→</kbd> / <kbd>Space</kbd>, go back with <kbd>←</kbd>. Record this frame while you narrate — each scene holds until you move on.</p>
+
+<script>
+  const scenes=[...document.querySelectorAll('.scene')];
+  const dotsWrap=document.getElementById('dots');
+  const count=document.getElementById('count');
+  const prev=document.getElementById('prev'), next=document.getElementById('next');
+  const autoBtn=document.getElementById('auto'), restart=document.getElementById('restart');
+  let i=0, timer=null;
+  const pad=n=>String(n+1).padStart(2,'0');
+
+  scenes.forEach((_,n)=>{
+    const d=document.createElement('button');
+    d.className='d'+(n===0?' on':''); d.setAttribute('aria-label','Scene '+(n+1));
+    d.onclick=()=>go(n); dotsWrap.appendChild(d);
+  });
+  const dots=[...dotsWrap.children];
+
+  function go(n){
+    i=Math.max(0,Math.min(scenes.length-1,n));
+    scenes.forEach((s,k)=>s.classList.toggle('active',k===i));
+    dots.forEach((d,k)=>d.classList.toggle('on',k===i));
+    count.textContent=pad(i)+' / '+String(scenes.length).padStart(2,'0');
+    prev.disabled=(i===0); next.disabled=(i===scenes.length-1);
+  }
+  function step(d){ if(d>0&&i===scenes.length-1){stopAuto();return;} go(i+d); }
+
+  prev.onclick=()=>step(-1);
+  next.onclick=()=>step(1);
+  restart.onclick=()=>{stopAuto();go(0);};
+
+  function startAuto(){ timer=setInterval(()=>step(1),9000); autoBtn.textContent='❚❚ Pause'; }
+  function stopAuto(){ if(timer){clearInterval(timer);timer=null;} autoBtn.textContent='▶ Auto'; }
+  autoBtn.onclick=()=>timer?stopAuto():startAuto();
+
+  const stage=document.getElementById('stage');
+  stage.focus();
+  window.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();stopAuto();step(1);}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();stopAuto();step(-1);}
+    else if(e.key==='Home'){e.preventDefault();stopAuto();go(0);}
+    else if(e.key==='End'){e.preventDefault();stopAuto();go(scenes.length-1);}
+  });
+  go(0);
+</script>

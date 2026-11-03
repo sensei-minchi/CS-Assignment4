@@ -1,0 +1,9 @@
+users.db
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# test/debug leftovers
+*.log
+cj*.txt
