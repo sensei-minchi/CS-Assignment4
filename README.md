@@ -8,10 +8,10 @@
 
 | Member Name | Roll Number | Category | Variant Implemented | Subproject Directory |
 | :--- | :--- | :--- | :--- | :--- |
-| **Shreyans Jain** | **IIT2024211** | **OS Command Injection** | **Variant 1: In-Band (Command Output Returned)** | [`Shreyans_Jain_IIT2024211-OS_command_injection/`](./Shreyans_Jain_IIT2024211-OS_command_injection/) |
-| **Chinmay Raheja** | **IIT2024164** | **Cross-Site Scripting (XSS)** | **Variant 1: Stored XSS** | [`Chinmay_Raheja_IIT2024164-Stored_XSS/`](./Chinmay_Raheja_IIT2024164-Stored_XSS/) |
-| **Kunal Khandelwal** | **IIT2024162** | **Cross-Site Scripting (XSS)** | **Variant 2: Reflected XSS** | [`Kunal_Khandelwal_IIT2024162-Reflected_XSS/`](./Kunal_Khandelwal_IIT2024162-Reflected_XSS/) |
-| **Vedant Bahekar** | **IIT2024166** | **SQL Injection** | **Variant 1: Authentication Bypass** | [`Vedant_Bahekar_IIT2024166-SQL_injection/`](./Vedant_Bahekar_IIT2024166-SQL_injection/) |
+| **Vedant Bahekar** | **IIT2024166** | **SQL Injection** | **Authentication Bypass** | [`Vedant_Bahekar_IIT2024166-SQL_injection/`](./Vedant_Bahekar_IIT2024166-SQL_injection/) |
+| **Shreyans Jain** | **IIT2024211** | **OS Command Injection** | **In-Band (Command Output Returned)** | [`Shreyans_Jain_IIT2024211-OS_command_injection/`](./Shreyans_Jain_IIT2024211-OS_command_injection/) |
+| **Chinmay Raheja** | **IIT2024164** | **Cross-Site Scripting (XSS)** | **Stored XSS** | [`Chinmay_Raheja_IIT2024164-Stored_XSS/`](./Chinmay_Raheja_IIT2024164-Stored_XSS/) |
+| **Kunal Khandelwal** | **IIT2024162** | **Cross-Site Scripting (XSS)** | **Reflected XSS** | [`Kunal_Khandelwal_IIT2024162-Reflected_XSS/`](./Kunal_Khandelwal_IIT2024162-Reflected_XSS/) |
 | **KUNAL V KURUNDWADKAR** | **IIT2024177** | *Cross-Site Request Forgery (CSRF)* | *[Variant Chosen]* | *TBD* |
 
 ---
