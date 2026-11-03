@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — CSRF Defense Lab{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="lab-box mb-4" style="background: linear-gradient(135deg, #0f172a, #1e1b4b); border-color: rgba(99, 102, 241, 0.3);">
+  <div class="lab-box-body p-4">
+    <div class="row align-items-center g-3">
+      <div class="col-lg-8">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="badge bg-indigo-subtle text-info border border-info-subtle px-2.5 py-1 fw-bold" style="font-size: 0.75rem;">
+            <i class="bi bi-shield-check me-1"></i> ACADEMIC LAB ASSIGNMENT
+          </span>
+          <span class="badge bg-secondary-subtle text-light border border-secondary px-2.5 py-1" style="font-size: 0.75rem;">
+            Variant 2 &bull; POST Auto-Submit
+          </span>
+        </div>
+        <h2 class="fw-extrabold text-white mb-2" style="font-weight: 800; letter-spacing: -0.5px;">
+          Cross-Site Request Forgery (CSRF) Defense Lab
+        </h2>
+        <p class="text-secondary mb-3" style="font-size: 0.95rem; line-height: 1.6;">
+          A standalone security testbed demonstrating <strong>POST-based Forged Actions via Auto-Submitting Forms</strong>
+          and its cryptographic mitigation using the <strong>Anti-CSRF Synchronizer Token Pattern</strong>.
+        </p>
+        <div class="d-flex flex-wrap gap-2">
+          <span class="badge-pill-kunal">
+            <i class="bi bi-person-fill"></i> Kunal Kurundwadkar
+          </span>
+          <span class="badge-pill-kunal">
+            <i class="bi bi-hash"></i> Roll No: IIT2024177
+          </span>
+          <span class="badge-pill-kunal">
+            <i class="bi bi-building"></i> Dept. of IT, IIIT Allahabad
+          </span>
+        </div>
+      </div>
+      <div class="col-lg-4 text-lg-end">
+        <div class="p-3 rounded-3 text-start border border-secondary" style="background: rgba(0,0,0,0.4);">
+          <div class="text-secondary small mb-1"><i class="bi bi-person-circle text-info me-1"></i> <strong>Active Simulated Victim:</strong></div>
+          <div class="fw-bold text-white font-monospace">{{ profile.username }} (ID: {{ profile.id }})</div>
+          <div class="small text-muted font-monospace mt-1">Current Email: <span class="text-info fw-bold">{{ profile.email }}</span></div>
+          <div class="small text-muted font-monospace">Balance: <span class="text-success fw-bold">₹{{ profile.balance }}</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Architecture & Mechanics Visual -->
+<div class="lab-box mb-4">
+  <div class="lab-box-header">
+    <div class="d-flex align-items-center gap-2">
+      <i class="bi bi-diagram-3-fill text-info"></i>
+      <span>Mechanics of a POST-based CSRF Attack</span>
+    </div>
+    <span class="badge bg-secondary" style="font-size: 0.72rem;">Table 2(c) Root Cause</span>
+  </div>
+  <div class="lab-box-body p-4">
+    <div class="row g-3 text-center">
+      <div class="col-md-4">
+        <div class="p-3 rounded-3 border border-secondary h-100" style="background: #090d16;">
+          <div class="fs-1 text-info mb-2"><i class="bi bi-person-check-fill"></i></div>
+          <h6 class="fw-bold text-white mb-1">1. Victim Session Active</h6>
+          <p class="text-secondary small mb-0">The legitimate user logs in to the corporate portal. The browser stores authenticated session cookies.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="p-3 rounded-3 border border-danger h-100" style="background: rgba(225, 29, 72, 0.08);">
+          <div class="fs-1 text-danger mb-2"><i class="bi bi-envelope-exclamation-fill"></i></div>
+          <h6 class="fw-bold text-danger mb-1">2. Attacker Site Lures Victim</h6>
+          <p class="text-secondary small mb-0">Victim visits an external malicious phishing page hosting a hidden form that auto-submits a forged POST request.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="p-3 rounded-3 border border-warning h-100" style="background: rgba(245, 158, 11, 0.08);">
+          <div class="fs-1 text-warning mb-2"><i class="bi bi-arrow-left-right"></i></div>
+          <h6 class="fw-bold text-warning mb-1">3. Ambient Cookies Sent</h6>
+          <p class="text-secondary small mb-0">Browser automatically attaches cookies with the cross-origin request. Insecure servers process it blindly!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Interactive Module Cards -->
+<div class="row g-4 mb-4">
+  <!-- Card 1: Vulnerable Endpoint -->
+  <div class="col-md-6">
+    <div class="lab-box h-100 border-danger d-flex flex-column" style="border-width: 1.5px;">
+      <div class="lab-box-header bg-danger text-white">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-unlock-fill"></i>
+          <span>Vulnerable Endpoint (/vulnerable)</span>
+        </div>
+        <span class="badge bg-white text-danger fw-bold" style="font-size: 0.7rem;">NO TOKEN CHECK</span>
+      </div>
+      <div class="lab-box-body d-flex flex-column flex-grow-1">
+        <p class="text-secondary small mb-3">
+          The email update endpoint processes POST requests solely based on ambient browser cookies without checking for an anti-CSRF token or verifying request origin.
+        </p>
+        <div class="p-2.5 rounded-3 border border-secondary mb-3 small font-monospace" style="background: #090d16;">
+          <span class="text-danger fw-bold">Vulnerable Code (app.py:114):</span><br>
+          <code class="text-secondary">@app.route('/vulnerable/update', methods=['POST'])<br>
+          def profile_vuln_update():<br>
+          &nbsp;&nbsp;update_email(request.form.get('email')) # ❌ No CSRF check</code>
+        </div>
+        <div class="mt-auto d-flex gap-2">
+          <a href="/vulnerable" class="btn btn-danger btn-sm flex-fill fw-bold">
+            <i class="bi bi-box-arrow-in-right me-1"></i> Open Vulnerable Portal
+          </a>
+          <a href="/attacker" target="_blank" class="btn btn-outline-warning btn-sm">
+            <i class="bi bi-lightning-charge"></i> Launch Attack Site
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card 2: Secured Endpoint -->
+  <div class="col-md-6">
+    <div class="lab-box h-100 border-success d-flex flex-column" style="border-width: 1.5px;">
+      <div class="lab-box-header bg-success text-white">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-shield-check"></i>
+          <span>Secured Endpoint (/secure)</span>
+        </div>
+        <span class="badge bg-white text-success fw-bold" style="font-size: 0.7rem;">SYNCHRONIZER TOKEN</span>
+      </div>
+      <div class="lab-box-body d-flex flex-column flex-grow-1">
+        <p class="text-secondary small mb-3">
+          Protects sensitive actions by embedding a cryptographically random, unpredictable token generated in the session. Forged cross-site requests cannot provide this token.
+        </p>
+        <div class="p-2.5 rounded-3 border border-secondary mb-3 small font-monospace" style="background: #090d16;">
+          <span class="text-success fw-bold">Mitigated Code (app.py:165):</span><br>
+          <code class="text-secondary">if not token or token != session.get('csrf_token'):<br>
+          &nbsp;&nbsp;return "403 Forbidden - CSRF Attack Blocked", 403</code>
+        </div>
+        <div class="mt-auto">
+          <a href="/secure" class="btn btn-success btn-sm w-100 fw-bold">
+            <i class="bi bi-shield-lock me-1"></i> Open Mitigated Portal
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Live Request Inspector / Activity Log -->
+<div class="lab-box mb-4">
+  <div class="lab-box-header">
+    <div class="d-flex align-items-center gap-2">
+      <i class="bi bi-activity text-info"></i>
+      <span>Live Request & Attack Audit Inspector</span>
+    </div>
+    <span class="badge bg-dark border border-secondary" style="font-size: 0.72rem;">Last 6 Incoming Requests</span>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-dark table-hover align-middle mb-0" style="font-size: 0.82rem;">
+      <thead style="background: #090d16; color: #94a3b8;">
+        <tr>
+          <th class="ps-3">Time</th>
+          <th>Endpoint</th>
+          <th>Method</th>
+          <th>Origin Header</th>
+          <th>Referer</th>
+          <th>CSRF Token</th>
+          <th class="text-end pe-3">Server Action</th>
+        </tr>
+      </thead>
+      <tbody class="font-monospace">
+        {% if logs %}
+          {% for log in logs %}
+          <tr>
+            <td class="ps-3 text-muted">{{ log.timestamp }}</td>
+            <td class="text-info fw-bold">{{ log.endpoint }}</td>
+            <td><span class="badge bg-secondary">{{ log.method }}</span></td>
+            <td class="text-truncate" style="max-width: 140px;">{{ log.origin_header }}</td>
+            <td class="text-truncate" style="max-width: 140px;">{{ log.referer_header }}</td>
+            <td>
+              {% if log.csrf_token_received == 'MISSING' or log.csrf_token_received == 'None' %}
+                <span class="badge bg-danger-subtle text-danger border border-danger-subtle">MISSING</span>
+              {% else %}
+                <span class="badge bg-success-subtle text-success border border-success-subtle">VALIDATED</span>
+              {% endif %}
+            </td>
+            <td class="text-end pe-3">
+              {% if 'BLOCKED' in log.status %}
+                <span class="badge bg-danger text-white">403 BLOCKED</span>
+              {% elif 'ATTACK' in log.status %}
+                <span class="badge bg-warning text-dark fw-bold">ATTACK SUCCESS</span>
+              {% else %}
+                <span class="badge bg-success text-white">200 OK</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="7" class="text-center py-3 text-secondary">
+              No requests recorded yet. Trigger the vulnerable or secure endpoints to view live packet analysis.
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+

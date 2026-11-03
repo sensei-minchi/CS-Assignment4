@@ -12,7 +12,7 @@
 | **Shreyans Jain** | **IIT2024211** | **OS Command Injection** | **In-Band (Command Output Returned)** | [`Shreyans_Jain_IIT2024211-OS_command_injection/`](./Shreyans_Jain_IIT2024211-OS_command_injection/) |
 | **Chinmay Raheja** | **IIT2024164** | **Cross-Site Scripting (XSS)** | **Stored XSS** | [`Chinmay_Raheja_IIT2024164-Stored_XSS/`](./Chinmay_Raheja_IIT2024164-Stored_XSS/) |
 | **Kunal Khandelwal** | **IIT2024162** | **Cross-Site Scripting (XSS)** | **Reflected XSS** | [`Kunal_Khandelwal_IIT2024162-Reflected_XSS/`](./Kunal_Khandelwal_IIT2024162-Reflected_XSS/) |
-| **KUNAL V KURUNDWADKAR** | **IIT2024177** | *Cross-Site Request Forgery (CSRF)* | *[Variant Chosen]* | *TBD* |
+| **Kunal Kurundwadkar** | **IIT2024177** | **Cross-Site Request Forgery (CSRF)** | **POST-based Forged Action (Auto-submitting form)** | [`Kunal_kurundwadkar_IIT2024177_CSRF_2/`](./Kunal_kurundwadkar_IIT2024177_CSRF_2/) |
 
 ---
 
@@ -37,3 +37,10 @@
 - **Technology:** Python, Flask, SQLite
 - **Summary:** A login portal with a vulnerable (string-concatenated) query path and a secure (parameterized) one. Demonstrates authentication bypass using `admin' --`, then the same payload being blocked after switching to parameterized queries.
 - **Details:** See [SQL Injection README](./Vedant_Bahekar_IIT2024166-SQL_injection/README.md).
+
+### 4. Cross-Site Request Forgery (Variant 2: POST-based Forged Action)
+- **Author:** Kunal Kurundwadkar (IIT2024177)
+- **Path:** [`Kunal_kurundwadkar_IIT2024177_CSRF_2/`](./Kunal_kurundwadkar_IIT2024177_CSRF_2/)
+- **Technology:** Python, Flask, SQLite
+- **Summary:** Demonstrates ambient credential exploitation via an auto-submitting POST form targeting victim email change, and cryptographic defense using the Anti-CSRF Synchronizer Token Pattern with token validation and rotation.
+- **Details:** See [CSRF README](./Kunal_kurundwadkar_IIT2024177_CSRF_2/README.md).

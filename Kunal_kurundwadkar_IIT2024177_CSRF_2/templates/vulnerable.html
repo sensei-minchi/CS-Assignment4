@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+{% block title %}Vulnerable Profile — CSRF Defense Lab{% endblock %}
+
+{% block content %}
+<!-- Module Header -->
+<div class="lab-box mb-4" style="border-left: 5px solid #e11d48;">
+  <div class="lab-box-body p-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-0.5 fw-bold" style="font-size: 0.72rem;">
+            <i class="bi bi-shield-x"></i> CSRF &bull; VARIANT 2
+          </span>
+          <span class="badge bg-danger text-white px-2 py-0.5" style="font-size: 0.72rem;">🔴 VULNERABLE PATH</span>
+        </div>
+        <h3 class="fw-bold text-white mb-1">POST-based Forged Action (Vulnerable Target)</h3>
+        <p class="text-secondary small mb-0">Endpoint processes sensitive state changes without verifying an anti-CSRF token or validating request origin.</p>
+      </div>
+      <div class="d-flex flex-column align-items-end gap-2">
+        <span class="badge-pill-kunal">
+          <i class="bi bi-person-fill text-danger"></i> Implemented by: <strong>Kunal Kurundwadkar</strong> (IIT2024177)
+        </span>
+        <div class="pill-mode-group">
+          <a href="/vulnerable" class="active-vuln"><i class="bi bi-bug-fill"></i> Vulnerable Path</a>
+          <a href="/secure" class="inactive"><i class="bi bi-shield-check"></i> Mitigated Path</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Interactive Target Form -->
+  <div class="col-lg-6">
+    <div class="lab-box border-danger" style="border-width: 1.5px;">
+      <div class="lab-box-header bg-danger text-white">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-person-gear"></i>
+          <span>Victim Profile Management Portal</span>
+        </div>
+        <span class="badge bg-white text-danger fw-bold" style="font-size: 0.68rem;">NO CSRF TOKEN</span>
+      </div>
+      <div class="lab-box-body">
+
+        {% if updated %}
+        <div class="alert alert-danger d-flex align-items-start gap-2 shadow-sm border-danger">
+          <i class="bi bi-exclamation-triangle-fill fs-4 text-danger flex-shrink-0"></i>
+          <div>
+            <strong class="d-block text-danger">💥 Table 2(b) CSRF Attack Succeeded!</strong>
+            The victim's profile email was altered <strong>without their intent or consent</strong> by a forged cross-site request!
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Active Profile Card -->
+        <div class="p-3 rounded-3 mb-3 border border-secondary" style="background: #090d16;">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>
+              <span class="text-secondary small d-block">Simulated User Session:</span>
+              <strong class="text-white">{{ profile.username }}</strong> <span class="badge bg-secondary font-monospace">Active Session</span>
+            </div>
+            {% if profile.email == 'attacker@evil.com' %}
+              <span class="badge bg-danger px-2.5 py-1.5"><i class="bi bi-exclamation-octagon-fill me-1"></i> ACCOUNT HIJACKED</span>
+            {% else %}
+              <span class="badge bg-info px-2.5 py-1.5"><i class="bi bi-shield-check me-1"></i> NORMAL STATE</span>
+            {% endif %}
+          </div>
+          <div class="small text-muted font-monospace">
+            Primary Email: <span class="text-white fw-bold">{{ profile.email }}</span>
+          </div>
+          <div class="small text-muted font-monospace">
+            Last Updated: <span class="text-secondary">{{ profile.last_updated }}</span>
+          </div>
+        </div>
+
+        <!-- Vulnerable Form -->
+        <form method="POST" action="/vulnerable/update">
+          <div class="mb-3">
+            <label class="form-label small fw-bold text-white">Update Primary Security Email</label>
+            <div class="input-group">
+              <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-envelope"></i></span>
+              <input type="email" name="email" class="form-control form-control-dark border-danger font-monospace"
+                     value="{{ profile.email }}" required>
+            </div>
+            <div class="form-text text-danger small mt-1">
+              ⚠️ Insecure Form: Lacks a cryptographically random synchronizer token!
+            </div>
+          </div>
+
+          <div class="d-flex align-items-center gap-2">
+            <button type="submit" class="btn btn-danger px-4 fw-bold">
+              <i class="bi bi-check2 me-1"></i> Save Changes
+            </button>
+            <a href="/secure" class="btn btn-outline-success">
+              View Mitigated <i class="bi bi-arrow-right"></i>
+            </a>
+          </div>
+        </form>
+
+      </div>
+    </div>
+
+    <!-- Live Demonstration Walkthrough Card -->
+    <div class="lab-box border-warning" style="background: rgba(245, 158, 11, 0.05);">
+      <div class="lab-box-header bg-warning-subtle text-warning-emphasis">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-lightning-charge-fill"></i>
+          <span class="fw-bold">Step-by-Step Viva Exploitation Instructions</span>
+        </div>
+      </div>
+      <div class="lab-box-body small">
+        <ol class="mb-0 ps-3 text-secondary">
+          <li class="mb-2">Notice the victim's current authenticated email is: <code class="text-info">{{ profile.email }}</code>.</li>
+          <li class="mb-2">
+            Simulate a phishing attack by clicking:
+            <a href="/attacker" target="_blank" class="fw-bold text-danger text-decoration-underline ms-1">
+              Launch Malicious Attacker Webpage <i class="bi bi-box-arrow-up-right"></i>
+            </a>
+          </li>
+          <li class="mb-2">The attacker page automatically fires an invisible auto-submitting POST form using JavaScript.</li>
+          <li>Return to this tab or refresh: your email is instantly hijacked to <code class="text-danger">attacker@evil.com</code>!</li>
+        </ol>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Exploit & Viva Defense Guidance -->
+  <div class="col-lg-6">
+
+    <!-- Exploit Code Preview -->
+    <div class="lab-box">
+      <div class="lab-box-header bg-dark text-white">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-lightning-charge-fill text-warning"></i>
+          <span class="fw-bold">Table 2(b) &bull; Working Exploit Payload</span>
+        </div>
+        <span class="badge bg-danger" style="font-size: 0.7rem;">Auto-Submitting Form</span>
+      </div>
+      <div class="lab-box-body">
+        <p class="small text-secondary mb-2">The attacker hosts this hidden HTML form on their malicious website (`evil.com`):</p>
+
+        <div class="d-flex justify-content-between align-items-center mb-1">
+          <span class="text-muted small fw-semibold">ATTACKER AUTO-SUBMIT HTML PAYLOAD:</span>
+          <button class="copy-btn" onclick="copyText(`<form action='http://127.0.0.1:5050/vulnerable/update' method='POST' id='csrfForm'>\\n  <input type='hidden' name='email' value='attacker@evil.com'>\\n</form>\\n<script>document.getElementById('csrfForm').submit();<\\/script>`, this)">
+            <i class="bi bi-clipboard"></i> Copy
+          </button>
+        </div>
+
+        <div class="payload-copy-box">
+          <code>&lt;form action=".../vulnerable/update" method="POST" id="csrfForm"&gt;...</code>
+          <span class="badge bg-danger-subtle text-danger" style="font-size: 0.68rem;">Auto-POST</span>
+        </div>
+
+        <div class="p-2.5 rounded-3 border border-secondary small text-secondary" style="background: #090d16;">
+          <strong class="text-white">Why the browser executes it:</strong>
+          <div class="mt-1">
+            Standard web browsers automatically attach stored session cookies with cross-origin requests. Because the endpoint does not require proof of user intent, the server accepts the forged request as genuine.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vulnerable Code Path (Table 2a & 2c) -->
+    <div class="mac-terminal">
+      <div class="mac-terminal-bar">
+        <div class="mac-dots">
+          <span class="mac-dot mac-dot-red"></span>
+          <span class="mac-dot mac-dot-yellow"></span>
+          <span class="mac-dot mac-dot-green"></span>
+        </div>
+        <span class="terminal-title text-secondary font-monospace" style="font-size: 0.74rem;">app.py:114 &bull; Table 2(a) Vulnerable Code Path</span>
+        <span class="badge bg-secondary" style="font-size: 0.65rem;">Flask Endpoint</span>
+      </div>
+      <div class="mac-terminal-code">
+        <pre><span class="text-secondary"># ❌ VULNERABLE: State change without anti-CSRF token verification</span>
+@app.route(<span class="text-warning">'/vulnerable/update'</span>, methods=[<span class="text-warning">'POST'</span>])
+def profile_vuln_update():
+    new_email = request.form.get(<span class="text-warning">'email'</span>, <span class="text-warning">''</span>)
+    <span class="text-secondary"># No synchronizer token or origin check!</span>
+    <span class="text-danger">update_email(new_email)</span>  <span class="text-secondary"># ← Blindly trusts ambient cookie!</span>
+    return redirect(url_for(<span class="text-warning">'profile_vuln'</span>))</pre>
+      </div>
+    </div>
+
+    <!-- Root Cause Analysis (Table 2c) -->
+    <div class="p-3 rounded-3 border border-secondary mb-3 small" style="background: #0f172a;">
+      <strong class="text-danger"><i class="bi bi-info-circle-fill me-1"></i> Table 2(c) Root Cause:</strong>
+      The server accepts state-changing POST requests relying solely on ambient browser credentials (session cookies) without demanding proof of user intent (an unpredictable synchronizer token). Browsers automatically attach cookies to cross-origin POST requests by default.
+    </div>
+
+    <!-- Table 2(e) Theory Panel -->
+    <details class="theory-dropdown">
+      <summary>
+        <span><i class="bi bi-journal-bookmark-fill me-2 text-warning"></i> Table 2(e) Other Mitigations (Theory Alternatives)</span>
+        <i class="bi bi-chevron-down"></i>
+      </summary>
+      <div class="theory-body">
+        <ul class="mb-0 ps-3">
+          <li class="mb-2">
+            <strong>Anti-CSRF Synchronizer Tokens (Primary Fix):</strong> Generate cryptographically random, unpredictable tokens stored in the session and verified in form payloads. Cross-origin sites cannot read this token due to the Same-Origin Policy (SOP).
+          </li>
+          <li class="mb-2">
+            <strong>SameSite Cookie Attribute:</strong> Setting cookies with <code>SameSite=Strict</code> or <code>SameSite=Lax</code> instructs modern browsers never to send cookies along with third-party cross-site requests.
+          </li>
+          <li class="mb-2">
+            <strong>Re-Authentication for Critical Actions:</strong> Prompting the user for their current password or sending an MFA confirmation code before allowing sensitive updates (e.g. email, password, financial transactions).
+          </li>
+          <li class="mb-2">
+            <strong>Origin & Referer Header Verification:</strong> Verifying that the HTTP <code>Origin</code> or <code>Referer</code> header strictly matches the application's trusted domain.
+          </li>
+          <li>
+            <strong>Avoid State-Changing GET Requests:</strong> Strictly adhering to HTTP semantics so that GET requests are read-only and idempotent.
+          </li>
+        </ul>
+      </div>
+    </details>
+
+  </div>
+</div>
+{% endblock %}
+

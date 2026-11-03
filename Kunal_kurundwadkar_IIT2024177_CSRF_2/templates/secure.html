@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+{% block title %}Secured Profile — CSRF Defense Lab{% endblock %}
+
+{% block content %}
+<!-- Module Header -->
+<div class="lab-box mb-4" style="border-left: 5px solid #059669;">
+  <div class="lab-box-body p-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+      <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-0.5 fw-bold" style="font-size: 0.72rem;">
+            <i class="bi bi-shield-check"></i> CSRF &bull; VARIANT 2
+          </span>
+          <span class="badge bg-success text-white px-2 py-0.5" style="font-size: 0.72rem;">🟢 MITIGATED PATH</span>
+        </div>
+        <h3 class="fw-bold text-white mb-1">Defense: Synchronizer Token Pattern (Anti-CSRF)</h3>
+        <p class="text-secondary small mb-0">Every state-changing form is bound to an unpredictable, cryptographically random token verified strictly on the server.</p>
+      </div>
+      <div class="d-flex flex-column align-items-end gap-2">
+        <span class="badge-pill-kunal">
+          <i class="bi bi-person-fill text-success"></i> Implemented by: <strong>Kunal Kurundwadkar</strong> (IIT2024177)
+        </span>
+        <div class="pill-mode-group">
+          <a href="/vulnerable" class="inactive"><i class="bi bi-bug-fill"></i> Vulnerable Path</a>
+          <a href="/secure" class="active-sec"><i class="bi bi-shield-check"></i> Mitigated Path</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Interactive Target Form -->
+  <div class="col-lg-6">
+    <div class="lab-box border-success" style="border-width: 1.5px;">
+      <div class="lab-box-header bg-success text-white">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-shield-lock-fill"></i>
+          <span>Secured Profile Management Portal</span>
+        </div>
+        <span class="badge bg-white text-success fw-bold" style="font-size: 0.68rem;">CSRF TOKEN ACTIVE</span>
+      </div>
+      <div class="lab-card-body p-3">
+
+        {% if error %}
+        <div class="alert alert-success d-flex align-items-start gap-2 shadow-sm border-success">
+          <i class="bi bi-shield-fill-check fs-4 text-success flex-shrink-0"></i>
+          <div>
+            <strong class="d-block text-success">🛡️ Table 2(d) Defense Confirmed: Forged Request Rejected (403 Forbidden)</strong>
+            {{ error }}
+            <div class="small text-muted mt-1">The attacker had no access to the victim's secret synchronizer token.</div>
+          </div>
+        </div>
+        {% elif updated %}
+        <div class="alert alert-success d-flex align-items-start gap-2 shadow-sm border-success">
+          <i class="bi bi-check-circle-fill fs-4 text-success flex-shrink-0"></i>
+          <div>
+            <strong class="d-block text-success">✅ Profile Successfully Updated</strong>
+            Legitimate request processed with valid anti-CSRF token verification.
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Active Profile Card -->
+        <div class="p-3 rounded-3 mb-3 border border-secondary" style="background: #090d16;">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>
+              <span class="text-secondary small d-block">Simulated User Session:</span>
+              <strong class="text-white">{{ profile.username }}</strong> <span class="badge bg-success font-monospace">Secured Session</span>
+            </div>
+            <span class="badge bg-success px-2.5 py-1.5"><i class="bi bi-shield-check me-1"></i> PROTECTED</span>
+          </div>
+          <div class="small text-muted font-monospace">
+            Primary Email: <span class="text-white fw-bold">{{ profile.email }}</span>
+          </div>
+          <div class="small text-muted font-monospace">
+            Last Updated: <span class="text-secondary">{{ profile.last_updated }}</span>
+          </div>
+        </div>
+
+        <!-- Secured Form -->
+        <form method="POST" action="/secure/update">
+          {# MITIGATION: Anti-CSRF Synchronizer Token #}
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+          <div class="mb-3">
+            <label class="form-label small fw-bold text-white">Update Primary Security Email</label>
+            <div class="input-group">
+              <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-envelope"></i></span>
+              <input type="email" name="email" class="form-control form-control-dark border-success font-monospace"
+                     value="{{ profile.email }}" required>
+            </div>
+            <div class="form-text text-success small mt-1">
+              ✅ Protected Form: Embeds session-bound secret synchronizer token
+            </div>
+          </div>
+
+          <!-- Token Inspection Box -->
+          <div class="p-2.5 rounded-3 border border-secondary mb-3 small" style="background: #090d16;">
+            <div class="text-secondary small" style="font-size: 0.74rem;"><strong>SESSION-BOUND CSRF TOKEN:</strong></div>
+            <code class="text-success font-monospace d-block text-truncate mt-0.5">{{ csrf_token }}</code>
+            <div class="text-muted mt-1" style="font-size: 0.7rem;">Generated via <code>secrets.token_hex(16)</code> & stored in server session.</div>
+          </div>
+
+          <div class="d-flex align-items-center gap-2">
+            <button type="submit" class="btn btn-success px-4 fw-bold">
+              <i class="bi bi-shield-check me-1"></i> Save Changes (Legitimate)
+            </button>
+            <a href="/vulnerable" class="btn btn-outline-danger">
+              <i class="bi bi-arrow-left"></i> View Vulnerable
+            </a>
+          </div>
+        </form>
+
+      </div>
+    </div>
+
+    <!-- Forged Request Testing Box -->
+    <div class="lab-box border-warning" style="background: rgba(245, 158, 11, 0.05);">
+      <div class="lab-box-header bg-warning-subtle text-warning-emphasis">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-shield-slash"></i>
+          <span class="fw-bold">Test Attacker Site Against Secure Endpoint</span>
+        </div>
+      </div>
+      <div class="lab-box-body small">
+        <p class="text-secondary mb-2">
+          If an external page attempts to forge a POST request to <code>/secure/update</code>, it cannot guess or read this victim's session token due to the Same-Origin Policy.
+        </p>
+        <form method="POST" action="/secure/update" class="d-inline">
+          <!-- Intentional forged request without valid session token -->
+          <input type="hidden" name="email" value="attacker@evil.com">
+          <input type="hidden" name="csrf_token" value="fake_attacker_forged_token_xyz">
+          <button type="submit" class="btn btn-outline-danger btn-sm fw-bold">
+            <i class="bi bi-bug"></i> Simulate Forged Cross-Site Request (Wrong/Missing Token)
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Mitigation Explanation -->
+  <div class="col-lg-6">
+
+    <div class="lab-box">
+      <div class="lab-box-header bg-dark text-white">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-shield-shaded text-success"></i>
+          <span class="fw-bold">Table 2(d) &bull; Mitigation Implemented</span>
+        </div>
+        <span class="badge bg-success" style="font-size: 0.7rem;">Synchronizer Token</span>
+      </div>
+      <div class="lab-box-body">
+        <h6 class="fw-bold text-white mb-2">How Synchronizer Tokens Prevent CSRF</h6>
+        <p class="small text-secondary mb-2">
+          The Synchronizer Token Pattern works by generating a cryptographically random, unpredictable token (<code>secrets.token_hex(16)</code>) tied to the user's active session.
+        </p>
+        <div class="p-2.5 rounded-3 border border-secondary small mb-2 text-secondary" style="background: #090d16;">
+          <strong class="text-white">Verification Process:</strong>
+          <ol class="mb-0 ps-3 mt-1">
+            <li>The server sends the secret token inside genuine HTML forms as a hidden input.</li>
+            <li>Upon submission, the server verifies: <code>request.form['csrf_token'] == session['csrf_token']</code>.</li>
+            <li>An external attacker's website cannot read this token from the victim's session due to the browser's <strong>Same-Origin Policy (SOP)</strong>.</li>
+            <li>Forged requests lack the token and are rejected with <strong>403 Forbidden</strong>.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hardened Code Snippet -->
+    <div class="mac-terminal">
+      <div class="mac-terminal-bar">
+        <div class="mac-dots">
+          <span class="mac-dot mac-dot-red"></span>
+          <span class="mac-dot mac-dot-yellow"></span>
+          <span class="mac-dot mac-dot-green"></span>
+        </div>
+        <span class="terminal-title text-secondary font-monospace" style="font-size: 0.74rem;">app.py:165 &bull; Table 2(d) Secure Code Path</span>
+        <span class="badge bg-success" style="font-size: 0.65rem;">Secure Implementation</span>
+      </div>
+      <div class="mac-terminal-code">
+        <pre><span class="text-secondary"># ✅ SECURE: Verify CSRF token before executing state-changing action</span>
+submitted = request.form.get(<span class="text-warning">'csrf_token'</span>, <span class="text-warning">''</span>)
+expected  = session.get(<span class="text-warning">'csrf_token'</span>, <span class="text-warning">''</span>)
+
+<span class="text-secondary"># Reject forged cross-site requests with 403 Forbidden:</span>
+<span class="text-success">if not submitted or submitted != expected:
+    return "403 Forbidden - CSRF token invalid", 403</span>
+
+<span class="text-secondary"># Token verified! Safe to process email update:</span>
+update_email(new_email)
+<span class="text-secondary"># Rotate token after use (Token Binding):</span>
+session[<span class="text-warning">'csrf_token'</span>] = secrets.token_hex(16)</pre>
+      </div>
+    </div>
+
+    <!-- Table 2(e) Theory Panel -->
+    <details class="theory-dropdown">
+      <summary>
+        <span><i class="bi bi-journal-bookmark-fill me-2 text-warning"></i> Table 2(e) Other Mitigations (Theory Alternatives)</span>
+        <i class="bi bi-chevron-down"></i>
+      </summary>
+      <div class="theory-body">
+        <ul class="mb-0 ps-3">
+          <li class="mb-2">
+            <strong>Anti-CSRF Synchronizer Tokens (Implemented):</strong> Enforces presence of unique, unpredictable tokens on state-changing requests.
+          </li>
+          <li class="mb-2">
+            <strong>SameSite Cookie Attribute:</strong> Setting <code>SameSite=Strict</code> prevents the browser from sending cookies on any cross-site request, eliminating CSRF for modern browsers.
+          </li>
+          <li class="mb-2">
+            <strong>Re-Authentication for Sensitive Actions:</strong> Forcing password re-entry or two-factor prompts before altering email or passwords.
+          </li>
+          <li class="mb-2">
+            <strong>Custom Request Headers:</strong> Requiring custom headers (e.g. <code>X-Requested-With</code>) in AJAX requests, which cannot be forged cross-origin without CORS permission.
+          </li>
+          <li>
+            <strong>Avoid State-Changing GET Requests:</strong> Strictly ensuring GET requests are idempotent and non-mutating.
+          </li>
+        </ul>
+      </div>
+    </details>
+
+  </div>
+</div>
+{% endblock %}
+

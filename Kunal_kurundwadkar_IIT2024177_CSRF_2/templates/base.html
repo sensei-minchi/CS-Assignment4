@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}CSRF Defense Lab{% endblock %} — Kunal Kurundwadkar (IIT2024177)</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap 5.3.2 & Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <style>
+    :root {
+      --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      --bg-dark: #090d16;
+      --surface-dark: #0f172a;
+      --surface-card: #141e33;
+      --border-dark: #1e293b;
+      --border-glow: rgba(56, 189, 248, 0.2);
+
+      --accent-cyan: #06b6d4;
+      --accent-indigo: #6366f1;
+      --accent-emerald: #10b981;
+      --accent-rose: #f43f5e;
+      --accent-amber: #f59e0b;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: #e2e8f0;
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top Institutional Ribbon */
+    .top-ribbon {
+      background: #030712;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 0.45rem 0;
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+
+    /* Navigation */
+    .navbar-lab {
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-dark);
+      padding: 0.85rem 0;
+    }
+    .brand-mark {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, #06b6d4, #4f46e5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.15rem;
+      box-shadow: 0 4px 14px rgba(6, 182, 212, 0.35);
+    }
+    .nav-btn-custom {
+      color: #cbd5e1;
+      font-size: 0.88rem;
+      font-weight: 600;
+      padding: 0.45rem 0.85rem;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .nav-btn-custom:hover {
+      color: white;
+      background: rgba(255, 255, 255, 0.07);
+    }
+    .nav-btn-custom.active {
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+    }
+
+    /* Cards */
+    .lab-box {
+      background: var(--surface-card);
+      border: 1px solid var(--border-dark);
+      border-radius: 14px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+    .lab-box-header {
+      background: var(--surface-dark);
+      border-bottom: 1px solid var(--border-dark);
+      padding: 0.95rem 1.35rem;
+      font-weight: 700;
+      font-size: 0.92rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .lab-box-body {
+      padding: 1.35rem;
+    }
+
+    /* Mode Switcher */
+    .pill-mode-group {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 3px;
+      display: inline-flex;
+      gap: 3px;
+    }
+    .pill-mode-group a {
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 0.4rem 0.9rem;
+      border-radius: 7px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .pill-mode-group a.active-vuln {
+      background: #e11d48;
+      color: white !important;
+      box-shadow: 0 2px 8px rgba(225, 29, 72, 0.4);
+    }
+    .pill-mode-group a.active-sec {
+      background: #059669;
+      color: white !important;
+      box-shadow: 0 2px 8px rgba(5, 150, 105, 0.4);
+    }
+    .pill-mode-group a.inactive {
+      color: #94a3b8;
+    }
+    .pill-mode-group a.inactive:hover {
+      color: white;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    /* Terminal Mac Window */
+    .mac-terminal {
+      background: #040711;
+      border: 1px solid #1e293b;
+      border-radius: 11px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+      margin-bottom: 1.25rem;
+    }
+    .mac-terminal-bar {
+      background: #0b1120;
+      border-bottom: 1px solid #1e293b;
+      padding: 0.55rem 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .mac-dots {
+      display: flex;
+      gap: 6px;
+    }
+    .mac-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .mac-dot-red { background: #f43f5e; }
+    .mac-dot-yellow { background: #fbbf24; }
+    .mac-dot-green { background: #10b981; }
+    .mac-terminal-code {
+      padding: 1rem 1.15rem;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      line-height: 1.6;
+      color: #e2e8f0;
+      overflow-x: auto;
+    }
+    .mac-terminal-code pre {
+      margin: 0;
+      font-family: inherit;
+      color: inherit;
+    }
+
+    /* Payload Copy Box */
+    .payload-copy-box {
+      background: #030712;
+      border: 1px solid #1f2937;
+      border-radius: 8px;
+      padding: 0.65rem 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: #38bdf8;
+      margin-bottom: 0.75rem;
+    }
+    .copy-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #cbd5e1;
+      padding: 0.25rem 0.65rem;
+      border-radius: 6px;
+      font-size: 0.76rem;
+      font-family: var(--font-sans);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .copy-btn:hover {
+      background: rgba(255, 255, 255, 0.18);
+      color: white;
+    }
+
+    /* Theory Expandable */
+    .theory-dropdown {
+      background: #0f172a;
+      border: 1px solid #d97706;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 1.25rem;
+    }
+    .theory-dropdown summary {
+      background: rgba(217, 119, 6, 0.15);
+      color: #fbbf24;
+      font-weight: 700;
+      font-size: 0.88rem;
+      padding: 0.85rem 1.15rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      user-select: none;
+    }
+    .theory-dropdown summary::-webkit-details-marker {
+      display: none;
+    }
+    .theory-body {
+      padding: 1.15rem;
+      font-size: 0.86rem;
+      line-height: 1.65;
+      color: #cbd5e1;
+      background: #090d16;
+    }
+
+    /* Badges */
+    .badge-pill-kunal {
+      background: rgba(99, 102, 241, 0.15);
+      color: #a5b4fc;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 20px;
+      padding: 0.3rem 0.75rem;
+      font-size: 0.76rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    /* Form Styles */
+    .form-control-dark {
+      background: #090d16;
+      border: 1px solid #334155;
+      color: white;
+      border-radius: 8px;
+    }
+    .form-control-dark:focus {
+      background: #090d16;
+      color: white;
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+    }
+    .form-control-dark.border-danger:focus {
+      border-color: #f43f5e;
+      box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.25);
+    }
+    .form-control-dark.border-success:focus {
+      border-color: #10b981;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+    }
+
+    /* Footer */
+    footer {
+      margin-top: auto;
+      background: #030712;
+      border-top: 1px solid var(--border-dark);
+      padding: 2rem 0;
+      font-size: 0.84rem;
+      color: #64748b;
+    }
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+  <!-- Top Institutional Bar -->
+  <div class="top-ribbon">
+    <div class="container d-flex justify-content-between align-items-center">
+      <div>
+        <i class="bi bi-mortarboard-fill text-info me-1"></i>
+        <strong>IIIT Allahabad</strong> &bull; Dept. of Information Technology &bull; Cyber Security (IT-30001)
+      </div>
+      <div class="d-none d-md-flex align-items-center gap-3">
+        <span>Instructor: <strong>Dr. Soumyadev Maity</strong></span>
+        <span>&bull;</span>
+        <span class="badge-pill-kunal">
+          <i class="bi bi-person-badge"></i> Kunal Kurundwadkar (IIT2024177)
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-lab sticky-top">
+    <div class="container">
+      <a class="d-flex align-items-center gap-2 text-decoration-none" href="/">
+        <div class="brand-mark">
+          <i class="bi bi-shield-lock-fill"></i>
+        </div>
+        <div>
+          <div class="fw-bold text-white fs-6 lh-1">ApexCorp <span class="badge bg-cyan text-dark fw-bold ms-1" style="background:#38bdf8; font-size:0.65rem;">CSRF LAB</span></div>
+          <small class="text-secondary" style="font-size: 0.7rem; font-weight: 500;">POST-based Forged Action Testbed</small>
+        </div>
+      </a>
+
+      <button class="navbar-toggler border-secondary text-white" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
+        <i class="bi bi-list fs-4"></i>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navMenu">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center gap-1">
+          <li class="nav-item">
+            <a class="nav-btn-custom {% if request.path == '/' %}active{% endif %}" href="/">
+              <i class="bi bi-speedometer2"></i> Dashboard
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-btn-custom {% if request.path == '/vulnerable' %}active{% endif %} text-danger" href="/vulnerable">
+              <i class="bi bi-bug-fill"></i> Vulnerable Path
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-btn-custom {% if request.path == '/secure' %}active{% endif %} text-success" href="/secure">
+              <i class="bi bi-shield-check"></i> Mitigated Path
+            </a>
+          </li>
+          <li class="nav-item ms-lg-2">
+            <a class="btn btn-danger btn-sm d-flex align-items-center gap-1 px-3 py-1.5 fw-bold" href="/attacker" target="_blank" style="border-radius: 8px; font-size: 0.82rem;">
+              <i class="bi bi-box-arrow-up-right"></i> Attacker Site <i class="bi bi-fire text-warning ms-1"></i>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content Container -->
+  <main class="container py-4 flex-grow-1">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row g-3 align-items-center">
+        <div class="col-md-6">
+          <div class="fw-bold text-light mb-1">
+            <i class="bi bi-shield-shaded text-info me-1"></i> Cross-Site Request Forgery (CSRF) — Variant 2
+          </div>
+          <div class="small">
+            Indian Institute of Information Technology Allahabad &bull; Cyber Security (IT-30001)<br>
+            Individual Implementation & Viva Defense by <strong>Kunal Kurundwadkar (IIT2024177)</strong>
+          </div>
+        </div>
+        <div class="col-md-6 text-md-end">
+          <form method="POST" action="/reset" class="d-inline">
+            <button type="submit" class="btn btn-outline-secondary btn-sm" style="font-size: 0.78rem;">
+              <i class="bi bi-arrow-counterclockwise"></i> Reset Lab State to Factory
+            </button>
+          </form>
+          <div class="small text-secondary mt-1">Autonomous Testbed &bull; Localhost Sandbox</div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Copy Payload Helper -->
+  <script>
+    function copyText(val, btn) {
+      navigator.clipboard.writeText(val).then(function() {
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-check2 text-success"></i> Copied!';
+        btn.classList.add('bg-success', 'text-white');
+        setTimeout(() => {
+          btn.innerHTML = orig;
+          btn.classList.remove('bg-success', 'text-white');
+        }, 1600);
+      });
+    }
+  </script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>
+
